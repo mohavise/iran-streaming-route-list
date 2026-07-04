@@ -32,7 +32,7 @@
 }
 
 /ip firewall address-list remove [find list=\$backupList]
-:foreach item in=[/ip firewall address-list find list=\$addressList] do={
+:foreach item in=[/ip firewall address-list find list=\$addressList dynamic=no] do={
     :local address [/ip firewall address-list get \$item address]
     :do {
         /ip firewall address-list add list=\$backupList address=\$address
@@ -46,7 +46,7 @@
 } on-error={
     :log warning \"Filimo update: import failed; restoring old address list\"
     /ip firewall address-list remove [find list=\$addressList]
-    :foreach item in=[/ip firewall address-list find list=\$backupList] do={
+    :foreach item in=[/ip firewall address-list find list=\$backupList dynamic=no] do={
         :local address [/ip firewall address-list get \$item address]
         :do {
             /ip firewall address-list add list=\$addressList address=\$address
@@ -60,7 +60,7 @@
 :if ([:len [/ip firewall address-list find list=\$addressList]] = 0) do={
     :log warning \"Filimo update: new list has no entries; restoring old address list\"
     /ip firewall address-list remove [find list=\$addressList]
-    :foreach item in=[/ip firewall address-list find list=\$backupList] do={
+    :foreach item in=[/ip firewall address-list find list=\$backupList dynamic=no] do={
         :local address [/ip firewall address-list get \$item address]
         :do {
             /ip firewall address-list add list=\$addressList address=\$address

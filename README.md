@@ -2,25 +2,31 @@
 
 This repository creates MikroTik address-list files for routing Filimo traffic through a specific route table.
 
-The project keeps source domains, generated IPs, and RouterOS updater scripts separate so updates can be refreshed safely.
+The project keeps source domains, generated hostnames, generated IPs, and RouterOS updater scripts separate so updates can be refreshed safely.
 
 ## Data Source
 
-The first version generates data from:
+The generator collects Filimo-related hosts and URLs from:
 
 - configured Filimo-related domains in `config/domains.txt`
+- common service hostnames such as `api`, `cdn`, `static`, `vod`, and `stream`
 - certificate transparency results for `*.filimo.com`
+- recent public `urlscan.io` observations
+- links found on the main Filimo pages
 - current DNS A records for discovered hostnames
 
-Filimo can use CDN-style delivery, so generated IPs should be refreshed regularly. The builder filters private and reserved IPv4 addresses before writing public routing outputs.
+Filimo can use CDN-style delivery, so the MikroTik output uses all discovered FQDN address-list entries. RouterOS resolves those names dynamically using the router DNS configuration and can add multiple IPs for one hostname. The builder still writes public IPv4 files for inspection and fallback use.
+
+No public method can guarantee every private/internal Filimo URL, but these sources give a repeatable public-domain discovery process for route-list generation.
 
 ## Address Lists
 
 | File | RouterOS address list | Purpose |
 | --- | --- | --- |
-| `mikrotik-filimo-address-list.rsc` | `filimo` | Filimo IPv4 hosts for policy routing |
+| `mikrotik-filimo-address-list.rsc` | `filimo` | All discovered Filimo FQDN hosts for policy routing |
 | `filimo-domains.txt` | - | Discovered Filimo hostnames |
 | `filimo-hosts.txt` | - | Hostnames resolved by the builder |
+| `filimo-urls.txt` | - | Discovered Filimo host URLs and page URLs |
 | `filimo-ips.txt` | - | Public IPv4 addresses |
 | `filimo-prefixes.txt` | - | Public IPv4 `/32` prefixes |
 
@@ -102,6 +108,7 @@ It runs every day at `23:30 UTC`, matching the update timing style used by `Get-
 
 - `filimo-domains.txt`
 - `filimo-hosts.txt`
+- `filimo-urls.txt`
 - `filimo-ips.txt`
 - `filimo-prefixes.txt`
 - `mikrotik-filimo-address-list.rsc`
@@ -114,4 +121,10 @@ Run from Git Bash on Windows or from any Bash shell:
 
 ```bash
 ./scripts/build-filimo.sh
+```
+
+If Python is installed but not on your Git Bash `PATH`, pass it explicitly:
+
+```bash
+FILIMO_PYTHON=/c/path/to/python.exe ./scripts/build-filimo.sh
 ```
