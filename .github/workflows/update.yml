@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y jq python3
 
-      - name: Generate Iranian streaming DNS static lists
+      - name: Generate Iranian streaming DNS static list
         run: |
           chmod +x scripts/build-iran-streaming.sh
           ./scripts/build-iran-streaming.sh
@@ -28,7 +28,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add iran-streaming-domains.txt iran-streaming-urls.txt services/iran-streaming/output/list-domains.rsc services/iran-streaming/output/list-all.rsc
+          git add iran-streaming-domains.txt iran-streaming-urls.txt services/iran-streaming/output/list-all.rsc
 
           if git diff --cached --quiet; then
             echo "No Iranian streaming DNS list changes"
