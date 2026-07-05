@@ -1,5 +1,5 @@
-# managed-by=mohavise-iran-streaming-route-list
-# project=iran-streaming-route-list
+# managed-by=mohavise-mikrotik-iran-streaming-route-list
+# project=mikrotik-iran-streaming-route-list
 # service=iran-streaming
 # List: Iranian streaming DNS static FWD rules
 # RouterOS address-list: DST-IRAN-STREAMING-TO-OUTBOUND
