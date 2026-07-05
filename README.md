@@ -1,12 +1,49 @@
-# Iran Streaming Route List for MikroTik
+# Iran Streaming DNS Policy Routing for MikroTik
 
-This repository creates MikroTik address-list files for routing Iranian video, VOD, live TV, and streaming traffic through a selected outbound path.
+DNS-static-first RouterOS list updater for routing Iranian video, VOD, live TV, and streaming services through a custom outbound path.
 
-The project keeps source domains, discovered hostnames, resolved IPs, and RouterOS updater scripts separate so updates can be refreshed safely.
+```text
+service domains -> /ip dns static type=FWD address-list -> DST-IRAN-STREAMING-TO-OUTBOUND -> mangle -> route target
+```
+
+This repository follows the same approach as `mikrotik-dns-policy-routing`: database first, generated MikroTik DNS static output, safe updater, and daily scheduler.
+
+## Important Design
+
+This repo does **not** use IP lists.
+
+It uses MikroTik DNS static FWD rules like this:
+
+```routeros
+/ip dns static
+add regexp="(^|.*\\.)filimo\\.com$" type=FWD address-list=DST-IRAN-STREAMING-TO-OUTBOUND comment="iran-streaming:filimo.com"
+```
+
+When clients use the MikroTik router as DNS, matched domain resolutions are automatically added to the target address list by RouterOS.
+
+## Structure
+
+```text
+safe-install-iran-streaming-small-router.rsc       root MikroTik entry point
+services/iran-streaming/database/domains.txt      trusted service database
+services/iran-streaming/output/list-domains.rsc   generated DNS static FWD rules
+services/iran-streaming/output/list-all.rsc       generated standalone import file
+services/iran-streaming/routeros/update.rsc       MikroTik updater script
+services/iran-streaming/routeros/scheduler.rsc    MikroTik daily scheduler
+scripts/build-iran-streaming.sh                   generator
+scripts/discover-iran-streaming.py                public-domain discovery helper
+.github/workflows/update.yml                      daily GitHub update workflow
+```
+
+## RouterOS List Name
+
+```text
+DST-IRAN-STREAMING-TO-OUTBOUND
+```
 
 ## Included Services
 
-The source list starts with popular Iranian video and streaming platforms, including:
+The source database starts with popular Iranian video and streaming platforms, including:
 
 - Filimo
 - Aparat
@@ -22,41 +59,13 @@ The source list starts with popular Iranian video and streaming platforms, inclu
 - IRIB / iFilm / TV-related services
 - related media/CDN domains such as Saba Idea and Saba Vision
 
-Edit this file to add or remove services:
+Edit the main database here:
 
 ```text
-config/domains.txt
+services/iran-streaming/database/domains.txt
 ```
 
-## Data Source
-
-The generator collects streaming-related hosts and URLs from:
-
-- configured root domains in `config/domains.txt`
-- common service hostnames such as `api`, `cdn`, `static`, `vod`, `video`, `live`, `stream`, and `player`
-- certificate transparency results
-- recent public `urlscan.io` observations
-- links found on the configured service pages
-- current DNS A records for discovered hostnames
-
-Streaming services can use CDN-style delivery, so the MikroTik output uses discovered FQDN address-list entries. RouterOS resolves those names dynamically using the router DNS configuration and can add multiple IPs for one hostname. The builder also writes public IPv4 files for inspection and fallback use.
-
-No public method can guarantee every private/internal CDN URL, but these sources give a repeatable public-domain discovery process for route-list generation.
-
-## Address Lists
-
-| File | RouterOS address list | Purpose |
-| --- | --- | --- |
-| `mikrotik-iran-streaming-address-list.rsc` | `iran-streaming` | All discovered streaming FQDN hosts for policy routing |
-| `iran-streaming-domains.txt` | - | Discovered streaming hostnames |
-| `iran-streaming-hosts.txt` | - | Hostnames resolved by the builder |
-| `iran-streaming-urls.txt` | - | Discovered streaming URLs and page URLs |
-| `iran-streaming-ips.txt` | - | Public IPv4 addresses |
-| `iran-streaming-prefixes.txt` | - | Public IPv4 `/32` prefixes |
-
-## Recommended Safe Install
-
-After renaming this repository to `iran-streaming-route-list`, use this on MikroTik:
+## Safe Install
 
 ```routeros
 /tool fetch url="https://raw.githubusercontent.com/mohavise/iran-streaming-route-list/main/safe-install-iran-streaming-small-router.rsc" dst-path=safe-install-iran-streaming-small-router.rsc mode=https
@@ -64,82 +73,101 @@ After renaming this repository to `iran-streaming-route-list`, use this on Mikro
 /file remove [find name=safe-install-iran-streaming-small-router.rsc]
 ```
 
-## Manual Install
-
-Install only the updater script:
-
-```routeros
-/tool fetch url="https://raw.githubusercontent.com/mohavise/iran-streaming-route-list/main/update-iran-streaming-small-router.rsc" dst-path=update-iran-streaming-small-router.rsc mode=https
-/import file-name=update-iran-streaming-small-router.rsc
-/system script run update-iran-streaming-small-router
-```
-
-## Automatic Router Updates
-
-After importing the updater script, import the scheduler file:
-
-```routeros
-/tool fetch url="https://raw.githubusercontent.com/mohavise/iran-streaming-route-list/main/scheduler-update-iran-streaming-small-router.rsc" dst-path=scheduler-update-iran-streaming-small-router.rsc mode=https
-/import file-name=scheduler-update-iran-streaming-small-router.rsc
-```
-
-Default router schedule:
-
-| Scheduler | Time |
-| --- | --- |
-| Iranian streaming updates | `04:00:00` daily |
-
-## Safety Logic
-
-The updater script avoids deleting a good old address list when the new download is broken or empty.
-
-Update flow:
-
-```mermaid
-flowchart TD
-    A["Start update"] --> B["Download new list from GitHub"]
-    B --> C{"Download OK?"}
-    C -- "No" --> D["Keep old address list"]
-    C -- "Yes" --> E{"File exists and size is OK?"}
-    E -- "No" --> D
-    E -- "Yes" --> F["Create backup address list"]
-    F --> G["Delete current iran-streaming list"]
-    G --> H["Import new list"]
-    H --> I{"Import OK and list has entries?"}
-    I -- "No" --> J["Restore old iran-streaming list from backup"]
-    I -- "Yes" --> K["Delete backup and downloaded file"]
-    J --> K
-    K --> L["Finish"]
-```
-
-The temporary backup list is:
+The safe installer fetches:
 
 ```text
-iran-streaming-backup-before-update
+services/iran-streaming/routeros/update.rsc
+services/iran-streaming/routeros/scheduler.rsc
 ```
 
-## Automatic GitHub List Updates
+Then it runs:
 
-The repository includes a GitHub Actions workflow:
+```routeros
+/system script run update-iran-streaming-outbound
+```
+
+## Manual Install
+
+```routeros
+/tool fetch url="https://raw.githubusercontent.com/mohavise/iran-streaming-route-list/main/services/iran-streaming/routeros/update.rsc" dst-path=update-iran-streaming-outbound.rsc mode=https
+/import file-name=update-iran-streaming-outbound.rsc
+/system script run update-iran-streaming-outbound
+```
+
+## Scheduler Install
+
+```routeros
+/tool fetch url="https://raw.githubusercontent.com/mohavise/iran-streaming-route-list/main/services/iran-streaming/routeros/scheduler.rsc" dst-path=scheduler-update-iran-streaming-outbound.rsc mode=https
+/import file-name=scheduler-update-iran-streaming-outbound.rsc
+/file remove [find name=scheduler-update-iran-streaming-outbound.rsc]
+```
+
+Default schedule:
+
+```text
+04:01:00 daily
+```
+
+## MikroTik Requirements
+
+Clients must use MikroTik as DNS, otherwise DNS static FWD address-list learning will not happen.
+
+At minimum:
+
+```routeros
+/ip dns set allow-remote-requests=yes
+```
+
+Then force/hand out the router DNS to clients using DHCP or firewall DNS redirect rules.
+
+## Policy Routing Example
+
+Example only; adjust the routing table and gateway to your own design.
+
+```routeros
+/routing table add name=to-outbound fib
+/ip firewall mangle add chain=prerouting dst-address-list=DST-IRAN-STREAMING-TO-OUTBOUND action=mark-routing new-routing-mark=to-outbound passthrough=no comment="Iran streaming to outbound"
+/ip route add dst-address=0.0.0.0/0 gateway=<YOUR-OUTBOUND-GATEWAY> routing-table=to-outbound
+```
+
+## Update Safety
+
+The updater script:
+
+1. exports current DNS static rules for backup
+2. downloads the generated list
+3. checks the file exists and is large enough
+4. imports the new DNS static FWD rules
+5. verifies the list is not empty
+6. restores backup if import fails
+
+Backup file:
+
+```text
+iran-streaming-dns-backup-before-update.rsc
+```
+
+## GitHub Automation
+
+Workflow:
 
 ```text
 .github/workflows/update.yml
 ```
 
-It runs every day at `23:30 UTC`, matching the update timing style used by `Get-IP-Iran-evo`, and regenerates:
+It runs every day at `23:30 UTC` and can also be started manually from GitHub Actions.
 
-- `iran-streaming-domains.txt`
-- `iran-streaming-hosts.txt`
-- `iran-streaming-urls.txt`
-- `iran-streaming-ips.txt`
-- `iran-streaming-prefixes.txt`
-- `mikrotik-iran-streaming-address-list.rsc`
+Generated files:
 
-You can also run it manually from the GitHub Actions tab.
+```text
+iran-streaming-domains.txt
+iran-streaming-urls.txt
+services/iran-streaming/output/list-domains.rsc
+services/iran-streaming/output/list-all.rsc
+mikrotik-iran-streaming-address-list.rsc
+```
 
-## Generate Lists Manually
-
-Run from Git Bash on Windows or from any Bash shell:
+## Generate Manually
 
 ```bash
 ./scripts/build-iran-streaming.sh
@@ -149,14 +177,4 @@ If Python is installed but not on your Git Bash `PATH`, pass it explicitly:
 
 ```bash
 IRAN_STREAMING_PYTHON=/c/path/to/python.exe ./scripts/build-iran-streaming.sh
-```
-
-## MikroTik Policy Routing Example
-
-Example only; adjust your routing table and gateway to your own design.
-
-```routeros
-/routing table add name=to-outbound fib
-/ip firewall mangle add chain=prerouting dst-address-list=iran-streaming action=mark-routing new-routing-mark=to-outbound passthrough=no comment="Iran streaming to outbound"
-/ip route add dst-address=0.0.0.0/0 gateway=<YOUR-OUTBOUND-GATEWAY> routing-table=to-outbound
 ```
