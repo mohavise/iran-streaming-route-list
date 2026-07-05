@@ -1,0 +1,22 @@
+# Generated seed list. GitHub Actions will refresh this file.
+# Address list: iran-streaming
+/ip firewall address-list remove [find list=iran-streaming]
+/ip firewall address-list add list=iran-streaming address=anten.ir comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=aparat.com comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=aparatkids.com comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=filimo.com comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=ifilmtv.ir comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=imvbox.com comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=irib.ir comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=lenz.ir comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=mp4.ir comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=namasha.com comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=namava.ir comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=sabaidea.com comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=sabavision.com comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=shabakema.com comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=tamasha.com comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=telewebion.com comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=televika.com comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=tv.ir comment="iran-streaming-route-list-fqdn"
+/ip firewall address-list add list=iran-streaming address=tva.ir comment="iran-streaming-route-list-fqdn"
