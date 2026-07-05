@@ -55,8 +55,8 @@ cat "$DB_FILE" "$DOMAINS_FILE" | normalize_domains > "$TMP_DIR/domains"
 mv "$TMP_DIR/domains" "$DOMAINS_FILE"
 
 {
-  echo '# managed-by=mohavise-iran-streaming-route-list'
-  echo '# project=iran-streaming-route-list'
+  echo '# managed-by=mohavise-mikrotik-iran-streaming-route-list'
+  echo '# project=mikrotik-iran-streaming-route-list'
   echo '# service=iran-streaming'
   echo '# List: Iranian streaming DNS static FWD rules'
   echo "# RouterOS address-list: $ADDR_LIST"
