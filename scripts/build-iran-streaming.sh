@@ -8,7 +8,6 @@ DB_FILE="$ROOT_DIR/services/$SERVICE/database/domains.txt"
 DOMAINS_FILE="$ROOT_DIR/iran-streaming-domains.txt"
 URLS_FILE="$ROOT_DIR/iran-streaming-urls.txt"
 OUT_DIR="$ROOT_DIR/services/$SERVICE/output"
-LIST_DOMAINS="$OUT_DIR/list-domains.rsc"
 LIST_ALL="$OUT_DIR/list-all.rsc"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
@@ -59,7 +58,7 @@ mv "$TMP_DIR/domains" "$DOMAINS_FILE"
   echo '# managed-by=mohavise-iran-streaming-route-list'
   echo '# project=iran-streaming-route-list'
   echo '# service=iran-streaming'
-  echo '# List: Iranian streaming domains'
+  echo '# List: Iranian streaming DNS static FWD rules'
   echo "# RouterOS address-list: $ADDR_LIST"
   echo '# Source: services/iran-streaming/database/domains.txt'
   echo '# do-not-edit-manually'
@@ -71,9 +70,7 @@ mv "$TMP_DIR/domains" "$DOMAINS_FILE"
     escaped="$(printf '%s' "$domain" | regex_escape_domain)"
     echo ":do { add regexp=\"(^|.*\\.)${escaped}\\$\" type=FWD address-list=$ADDR_LIST comment=\"iran-streaming:$domain\" } on-error={}"
   done < "$DOMAINS_FILE"
-} > "$LIST_DOMAINS"
-
-cp "$LIST_DOMAINS" "$LIST_ALL"
+} > "$LIST_ALL"
 
 echo "domains: $(wc -l < "$DOMAINS_FILE")"
 echo "output: $LIST_ALL"
