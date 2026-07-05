@@ -1,4 +1,4 @@
-name: Update Iranian Streaming Lists
+name: Update Iranian Streaming DNS Lists
 
 on:
   schedule:
@@ -17,9 +17,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y dnsutils jq python3
+        run: sudo apt-get update && sudo apt-get install -y jq python3
 
-      - name: Generate Iranian streaming lists
+      - name: Generate Iranian streaming DNS static lists
         run: |
           chmod +x scripts/build-iran-streaming.sh
           ./scripts/build-iran-streaming.sh
@@ -28,11 +28,11 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add iran-streaming-domains.txt iran-streaming-hosts.txt iran-streaming-urls.txt iran-streaming-ips.txt iran-streaming-prefixes.txt mikrotik-iran-streaming-address-list.rsc
+          git add iran-streaming-domains.txt iran-streaming-urls.txt mikrotik-iran-streaming-address-list.rsc services/iran-streaming/output/list-domains.rsc services/iran-streaming/output/list-all.rsc
 
           if git diff --cached --quiet; then
-            echo "No Iranian streaming list changes"
+            echo "No Iranian streaming DNS list changes"
           else
-            git commit -m "Automatic Iranian streaming route list update"
+            git commit -m "Automatic Iranian streaming DNS route list update"
             git push
           fi
