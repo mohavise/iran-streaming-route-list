@@ -1,15 +1,14 @@
-# managed-by=mohavise-iran-streaming-route-list
-# project=iran-streaming-route-list
+# managed-by=mohavise-mikrotik-iran-streaming-route-list
+# project=mikrotik-iran-streaming-route-list
 # service=iran-streaming
 # single-orchestration-file
 
 :do {
     :local scriptName "update-iran-streaming-outbound"
     :local scheduleName "update-iran-streaming-outbound"
-    :local listUrl "https://raw.githubusercontent.com/mohavise/iran-streaming-route-list/main/services/iran-streaming/output/list-all.rsc"
     :local scriptSource ":local fileName \"iran-streaming-outbound.rsc\"
 :local dnsBackup \"iran-streaming-dns-backup-before-update.rsc\"
-:local url \"https://raw.githubusercontent.com/mohavise/iran-streaming-route-list/main/services/iran-streaming/output/list-all.rsc\"
+:local url \"https://raw.githubusercontent.com/mohavise/mikrotik-iran-streaming-route-list/main/services/iran-streaming/output/list-all.rsc\"
 :local addrList \"DST-IRAN-STREAMING-TO-OUTBOUND\"
 :local minFileSize 1000
 :if ([:len [/file find name=\$fileName]] > 0) do={ /file remove \$fileName }
@@ -28,12 +27,12 @@
     :if ([:len [/system script find name=$scriptName]] > 0) do={
         /system script remove [find name=$scriptName]
     }
-    /system script add name=$scriptName owner=admin dont-require-permissions=no policy=read,write,policy,test source=$scriptSource comment="managed-by=mohavise-iran-streaming-route-list service=iran-streaming"
+    /system script add name=$scriptName owner=admin dont-require-permissions=no policy=read,write,policy,test source=$scriptSource comment="managed-by=mohavise-mikrotik-iran-streaming-route-list service=iran-streaming"
 
     :if ([:len [/system scheduler find name=$scheduleName]] > 0) do={
         /system scheduler remove [find name=$scheduleName]
     }
-    /system scheduler add name=$scheduleName start-time=04:01:00 interval=1d on-event=("/system script run " . $scriptName) policy=read,write,policy,test comment="managed-by=mohavise-iran-streaming-route-list service=iran-streaming"
+    /system scheduler add name=$scheduleName start-time=04:01:00 interval=1d on-event=("/system script run " . $scriptName) policy=read,write,policy,test comment="managed-by=mohavise-mikrotik-iran-streaming-route-list service=iran-streaming"
 
     /system script run $scriptName
 }
