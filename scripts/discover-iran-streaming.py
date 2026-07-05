@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-import ipaddress
 import json
 import re
-import socket
 import sys
 import urllib.parse
 import urllib.request
@@ -10,8 +8,9 @@ from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
+SERVICE_DIR = ROOT_DIR / "services" / "iran-streaming"
+DATABASE_FILE = SERVICE_DIR / "database" / "domains.txt"
 USER_AGENT = "iran-streaming-route-list/1.0"
-socket.setdefaulttimeout(8)
 
 COMMON_HOSTS = (
     "account", "api", "app", "asset", "assets", "auth", "cdn", "cdn1", "cdn2", "cdn3",
@@ -30,11 +29,10 @@ def fetch_text(url):
 
 
 def load_root_domains():
-    config = ROOT_DIR / "config" / "domains.txt"
     roots = set()
-    if not config.exists():
+    if not DATABASE_FILE.exists():
         return roots
-    for line in config.read_text(encoding="utf-8", errors="replace").splitlines():
+    for line in DATABASE_FILE.read_text(encoding="utf-8", errors="replace").splitlines():
         line = line.split("#", 1)[0].strip().lower()
         if not line:
             continue
@@ -100,21 +98,6 @@ def load_crtsh(hosts):
             add_hosts_from_text(hosts, item.get("common_name", ""))
 
 
-def load_certspotter(hosts):
-    for root in ROOT_DOMAINS:
-        url = f"https://api.certspotter.com/v1/issuances?domain={urllib.parse.quote(root)}&include_subdomains=true&expand=dns_names"
-        try:
-            data = json.loads(fetch_text(url))
-        except Exception as exc:
-            print(f"warning: certspotter failed for {root}: {exc}", file=sys.stderr)
-            continue
-        for item in data:
-            for name in item.get("dns_names", []):
-                host = normalize_host(name)
-                if host:
-                    hosts.add(host)
-
-
 def load_urlscan(hosts, urls):
     for root in ROOT_DOMAINS:
         api_url = f"https://urlscan.io/api/v1/search/?q=domain:{urllib.parse.quote(root)}&size=100"
@@ -141,23 +124,6 @@ def crawl_seed_pages(hosts, urls):
         add_urls_from_text(urls, hosts, text)
 
 
-def resolve_hosts(hosts):
-    ips = set()
-    resolved_hosts = set()
-    for host in sorted(hosts):
-        try:
-            for family, _, _, _, sockaddr in socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM):
-                if family != socket.AF_INET:
-                    continue
-                ip = ipaddress.ip_address(sockaddr[0])
-                if ip.is_global:
-                    ips.add(str(ip))
-                    resolved_hosts.add(host)
-        except socket.gaierror:
-            continue
-    return resolved_hosts, ips
-
-
 def write_lines(path, values):
     path.write_text("".join(f"{value}\n" for value in sorted(values)), encoding="utf-8")
 
@@ -168,23 +134,16 @@ def main():
 
     load_seed_hosts(hosts)
     load_crtsh(hosts)
-    load_certspotter(hosts)
     load_urlscan(hosts, urls)
     crawl_seed_pages(hosts, urls)
 
-    resolved_hosts, ips = resolve_hosts(hosts)
     host_urls = {f"https://{host}/" for host in hosts}
 
     write_lines(ROOT_DIR / "iran-streaming-domains.txt", hosts)
-    write_lines(ROOT_DIR / "iran-streaming-hosts.txt", resolved_hosts)
     write_lines(ROOT_DIR / "iran-streaming-urls.txt", urls | host_urls)
-    write_lines(ROOT_DIR / "iran-streaming-ips.txt", ips)
-    write_lines(ROOT_DIR / "iran-streaming-prefixes.txt", {f"{ip}/32" for ip in ips})
 
     print(f"domains: {len(hosts)}")
-    print(f"resolved hosts: {len(resolved_hosts)}")
     print(f"urls: {len(urls | host_urls)}")
-    print(f"ips: {len(ips)}")
 
 
 if __name__ == "__main__":
