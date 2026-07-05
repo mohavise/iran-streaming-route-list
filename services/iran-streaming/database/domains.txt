@@ -1,4 +1,5 @@
-# managed-by=mohavise-mikrotik-dns-policy-routing-style
+# managed-by=mohavise-mikrotik-iran-streaming-route-list
+# project=mikrotik-iran-streaming-route-list
 # service=iran-streaming
 # Iranian video / VOD / live streaming services, one domain per line
 
