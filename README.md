@@ -68,7 +68,7 @@ services/iran-streaming/database/domains.txt
 This single file creates the update script, creates the daily scheduler, and runs the first update once:
 
 ```routeros
-/tool fetch url="https://raw.githubusercontent.com/mohavise/iran-streaming-route-list/main/safe-install-iran-streaming-small-router.rsc" dst-path=safe-install-iran-streaming-small-router.rsc mode=https
+/tool fetch url="https://raw.githubusercontent.com/mohavise/mikrotik-iran-streaming-route-list/main/safe-install-iran-streaming-small-router.rsc" dst-path=safe-install-iran-streaming-small-router.rsc mode=https
 /import file-name=safe-install-iran-streaming-small-router.rsc
 /file remove [find name=safe-install-iran-streaming-small-router.rsc]
 ```
