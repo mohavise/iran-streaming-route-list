@@ -12,6 +12,16 @@ jobs:
   update:
     runs-on: ubuntu-latest
 
+    env:
+      # Manual/database domains are the primary source.
+      # Public discovery sources are optional enrichment only.
+      IRAN_STREAMING_CRT_TIMEOUT: "8"
+      IRAN_STREAMING_URLSCAN_TIMEOUT: "8"
+      IRAN_STREAMING_PAGE_TIMEOUT: "8"
+      IRAN_STREAMING_ENABLE_CRTSH: "1"
+      IRAN_STREAMING_ENABLE_URLSCAN: "1"
+      IRAN_STREAMING_ENABLE_PAGE_CRAWL: "1"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
