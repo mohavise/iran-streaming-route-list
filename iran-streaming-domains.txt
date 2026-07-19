@@ -122,14 +122,12 @@ auth.telewebion.com
 auth.tv.ir
 auth.tva.ir
 bazargani.irib.ir
-blog.aparatkids.com
 blog.namava.ir
 blog.sabavision.com
 cdn-live.irib.ir
 cdn.anten.ir
 cdn.aparat.com
 cdn.aparatkids.com
-cdn.asset.aparatkids.com
 cdn.filimo.com
 cdn.ifilmtv.ir
 cdn.imvbox.com
@@ -224,12 +222,6 @@ dl.televika.com
 dl.telewebion.com
 dl.tv.ir
 dl.tva.ir
-dl10.mp4.ir
-dl11.mp4.ir
-dl12.mp4.ir
-dl15.mp4.ir
-dl16.mp4.ir
-dl24.mp4.ir
 dl8.mp4.ir
 download.anten.ir
 download.aparat.com
@@ -375,9 +367,7 @@ imvbox.com
 irib.ir
 japanese.irib.ir
 job.sabaidea.com
-landing.aparatkids.com
 lenz.ir
-link-s2g.aparatkids.com
 live.anten.ir
 live.aparat.com
 live.aparatkids.com
@@ -439,7 +429,6 @@ m.televika.com
 m.telewebion.com
 m.tv.ir
 m.tva.ir
-mail.mp4.ir
 media.anten.ir
 media.aparat.com
 media.aparatkids.com
