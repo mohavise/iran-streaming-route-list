@@ -8,13 +8,16 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: iran-streaming-list-update
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     env:
-      # Manual/database domains are the primary source.
-      # Public discovery sources are optional enrichment only.
       IRAN_STREAMING_CRT_TIMEOUT: "8"
       IRAN_STREAMING_URLSCAN_TIMEOUT: "8"
       IRAN_STREAMING_PAGE_TIMEOUT: "8"
@@ -25,24 +28,26 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y jq python3
-
-      - name: Generate Iranian streaming DNS static list
-        run: |
-          chmod +x scripts/build-iran-streaming.sh
-          ./scripts/build-iran-streaming.sh
+      - name: Generate and validate Iranian streaming list
+        run: bash ./scripts/build-iran-streaming.sh
 
       - name: Commit changes
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add iran-streaming-domains.txt iran-streaming-urls.txt services/iran-streaming/output/list-all.rsc
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            iran-streaming-domains.txt \
+            iran-streaming-urls.txt \
+            services/iran-streaming/output/list-all.rsc
 
           if git diff --cached --quiet; then
-            echo "No Iranian streaming DNS list changes"
-          else
-            git commit -m "Automatic Iranian streaming DNS route list update"
-            git push
+            echo "No Iranian streaming list changes."
+            exit 0
           fi
+
+          git commit -m "Update Iranian streaming DNS route list"
+          git pull --rebase origin main
+          git push origin HEAD:main
